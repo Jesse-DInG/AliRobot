@@ -10,7 +10,7 @@ async function grabPage (id, browser) {
   try {
     await page.goto(`https://www.aliexpress.com/store/contactinfo/${id}.html`)
     const data = await getData(page)
-
+    data.id = id
     return data
   } catch (e) {
     const resp = await page.content()
@@ -42,13 +42,14 @@ async function init () {
     encoding: 'utf8'
   })
 
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']})// 禁用沙盒
   let start = 700000
   for (let i = 0; i < 10; i++) {
     doNext()
   }
 
   function doNext () {
+    if (start > 800000) return
     grabPage(++start, browser).then(data => {
       out.write(JSON.stringify(data, null, 4))
       console.log('load page：' + start + ' success')
